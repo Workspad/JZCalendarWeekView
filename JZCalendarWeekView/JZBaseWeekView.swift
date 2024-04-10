@@ -587,7 +587,15 @@ extension JZBaseWeekView: UICollectionViewDelegate, UICollectionViewDelegateFlow
         let shouldScrollToContentOffsetX = CGFloat(shouldScrollToPage) * pageWidth
         // if shouldScrollToContentOffsetX equals currentContentOffsetX which means scrollViewDidEndDecelerating won't be called
         // This case is now handled in scrollViewDidEndDragging
-        targetContentOffset.pointee = CGPoint(x: shouldScrollToContentOffsetX, y: currentContentOffset.y)
+                        
+        if isVelocitySatisfied {
+            // Перелистывание вперед/назад
+            targetContentOffset.pointee = scrollView.contentOffset
+            scrollView.setContentOffset(CGPoint(x: shouldScrollToContentOffsetX, y: currentContentOffset.y), animated: true)
+        } else {
+            // Debounce эффект при недостаточном скролле
+            targetContentOffset.pointee.x = shouldScrollToContentOffsetX
+        }
     }
 
     /// Load the page after horizontal scroll action.
