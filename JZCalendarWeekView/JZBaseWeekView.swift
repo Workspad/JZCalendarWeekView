@@ -15,6 +15,7 @@ public protocol JZBaseViewDelegate: class {
     ///   - weekView: current JZBaseWeekView
     ///   - initDate: the new value of initDate
     func initDateDidChange(_ weekView: JZBaseWeekView, initDate: Date)
+    func iniDateWillChange(_ weekView: JZBaseWeekView, initDate: Date)
 }
 
 extension JZBaseViewDelegate {
@@ -532,6 +533,20 @@ extension JZBaseWeekView: UICollectionViewDelegate, UICollectionViewDelegateFlow
     open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         // vertical scroll should not call paginationEffect
         guard let scrollDirection = self.scrollDirection, scrollDirection.direction == .horizontal else { return }
+
+         let currentOffsetX = collectionView.contentOffset.x
+        var isNext = true
+        if targetContentOffset.pointee.x > currentOffsetX {
+            isNext = true
+        } 
+        if targetContentOffset.pointee.x < currentOffsetX {
+            isNext = false
+        }
+        
+        let currentDate = getDateForContentOffsetX(collectionView.contentOffset.x)
+        let willInitDate = currentDate.add(component: .day, value: isNext ? numOfDays : -numOfDays)
+        baseDelegate?.iniDateWillChange(self, initDate: willInitDate)
+        
         paginationEffect(scrollView, withVelocity: velocity, targetContentOffset: targetContentOffset)
     }
 
